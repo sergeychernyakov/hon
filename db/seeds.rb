@@ -18,3 +18,4 @@ LightApi.create(
   account: '',
   light_key: ''
 )
+AdminUser.create!(email: 'sergiy@sqsoft.com', password: 'pass.123', password_confirmation: 'pass.123', first_name: "Admin") if Rails.env.development?
