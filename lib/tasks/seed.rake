@@ -82,11 +82,11 @@ namespace :seed do
   task :auth_lightspeed => :environment do
     # Use the following link to generate a code.
     # Be mindful that you have to do within like 5 seconds or it fails so quickly copy and paste and run
-    # https://cloud.lightspeedapp.com/oauth/authorize.php?response_type=code&client_id=c8524d364313825929e634de4874806a4499dd7979908b34b07b4d960c01a722&scope=employee:all
+    # https://cloud.lightspeedapp.com/oauth/authorize.php?response_type=code&client_id=client_id&scope=employee:all
     light_api = LightApi.new(
-      client_id: "c8524d364313825929e634de4874806a4499dd7979908b34b07b4d960c01a722",
-      client_secret: "00c9e67b895f42666ed41375732e3c41a9930d1cc67150407ba1097662c5a236",
-      account: "261144"
+      client_id: "client_id",
+      client_secret: "client_secret",
+      account: "account number"
     )
     response = light_api.authorize_light(code: "<YOUR CODE FROM ABOVE LINK HERE>")
     light_api.update!(refresh: response["refresh_token"], light_key: response["access_token"])
@@ -97,8 +97,8 @@ namespace :seed do
   end
 
   task :auth_oro => :environment do
-    client_id = "vRpko+Zuwv23oxS/RLgqFqdMa/TXzaH9C5LFXTm/"
-    client_secret = "cei8EdCuExY9ukb9CG1nAhGaNjNcFWZrmZ3N4dIX"
+    client_id = "client_id"
+    client_secret = "client_idX"
     new_oro = OroApi.new(client_id: client_id, client_secret: client_secret)
   end
 end
