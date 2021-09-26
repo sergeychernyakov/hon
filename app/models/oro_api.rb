@@ -1,6 +1,8 @@
 class OroApi < ApplicationRecord
   include HTTParty
 
+  has_many :light_apis
+
 
   def self.sanitize_order_lines(params)
     sanitized_lines = params[:lines].map do |ol|
@@ -20,7 +22,7 @@ class OroApi < ApplicationRecord
 
   def headers
     {
-      "Authorization": "Basic #{Base64.encode64("#{ENV["ORO_CLIENT"]}:#{ENV["ORO_SECRET"]}").gsub("\n", "")}",
+      "Authorization": "Basic #{Base64.encode64("#{client_id}:#{client_secret}").gsub("\n", "")}",
       "Content-Type": "application/json"
     }
     #{ENV["ORO_CLIENT"]}:#{ENV["ORO_SECRET"]}
@@ -32,6 +34,10 @@ class OroApi < ApplicationRecord
 
   def purchase_orders
     self.class.get("https://api.ordoro.com/purchase_order/", headers: headers).parsed_response
+  end
+
+  def orders
+    self.class.get("https://api.ordoro.com/order/", headers: headers).parsed_response
   end
 
   def warehouses
@@ -74,13 +80,13 @@ class OroApi < ApplicationRecord
   end
 
   def create_sales_order(params)
-    payload = OroApi.create_sales_order_payload(lines: params[:lines])
+    payload = OroApi.create_sales_order_payload(lines: params[:lines], order_id: params[:order_id])
     res = self.class.post("https://api.ordoro.com/v3/order", headers: headers, body: JSON.dump(payload)).parsed_response
-    binding.pry
     res
   end
 
   def self.create_sales_order_payload(params)
+    order_id = "#{params[:order_id]}"
     mapped_lines = params[:lines].map do |z|
         {
           "product_name": z["name"],
@@ -114,7 +120,7 @@ class OroApi < ApplicationRecord
         "tax_amount": counter * 0.05,
         "grand_total": counter + (counter * 0.05),
         "order_date": Time.zone.now.to_s,
-        "order_id": "myorder-id-test10",
+        "order_id": "myorder-id-#{order_id}",
         "shipping_address": {
             "city": "Athens",
             "country": "USA",

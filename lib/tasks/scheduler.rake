@@ -31,16 +31,29 @@ end
 
 task :transfer_purchased_orders_to_orodoro => :environment do
   puts "Creating test Purchase Order"
-  l = LightApi.last
-  o = OroApi.last
-  l.refresh_token
-  po = l.purchase_order(id: "5")
-  items = po["Order"]["OrderLines"]["OrderLine"]
-  item_ids = items.pluck("itemID")
-  payload = l.get_item_payload(ids: item_ids, shop_id: "1").select { |x| x["shop"] == "1" }
-  payload.each do |p|
-    p["quantity"] = items.find {|x| x["itemID"] == p["item"] }["quantity"].to_i
+  l = LightApi.all.each do |light_api|
+    oro_api = light_api.oro_api || OroApi.last
+    next if oro_api.blank?
+
+    light_api.refresh_token
+    light_api.purchase_orders_ready_for_oro.each do |po|
+      order_id = po["orderID"]
+      items = po["OrderLines"]["OrderLine"]
+      item_ids = items.pluck("itemID")
+
+      payload = light_api.get_item_payload(ids: item_ids, shop_id: "1").select { |x| x["shop"] == "1" }
+      payload.each do |p|
+        p["quantity"] = items.find {|x| x["itemID"] == p["item"] }["quantity"].to_i
+      end
+      oro_order = oro_api.create_sales_order(lines: payload, order_id: order_id)
+
+      light_api.update_po_oro_completed(id: order_id) #mark oro_completed custom field
+
+      "Order ID: #{order_id} Created successfully on ORO side"
+    end
+
+    puts "Light API ID: #{light_api.id} Synced properly"
+
   end
-  oro_order = o.create_sales_order(lines: payload)
-  puts "done."
+  puts "All Light API accounts synced"
 end
