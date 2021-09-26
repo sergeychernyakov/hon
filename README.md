@@ -17,9 +17,10 @@ Rails 6.1, Bundler 2+, Postgres, ruby 2.6.6
 4. rails db:migrate 
 5. rails s (not needed or recommended, unless for Postman debugging)
 
-### SET VARS
-ORO_CLIENT: 
-ORO_SECRET: 
+### SET Lightspeed POS API and Orodoro accounts
+Access admin panel using /admin
+Create multiple Lightspeed POS API and Orodoro accounts from admin panel
+Link Lightspeed POS API accounts properly with the Orodoro account
 
 ###
 Running tasks 

@@ -1,6 +1,10 @@
 class LightApi < ApplicationRecord
   include HTTParty
 
+  belongs_to :oro_api, optional: true
+
+  ORO_COMPLETED = 'oro_completed'
+
   def get_reconciles
     self.class.get("https://api.lightspeedapp.com/API/Account/#{account}/InventoryCountReconcile.json", headers: headers).parsed_response
   end
@@ -165,18 +169,23 @@ class LightApi < ApplicationRecord
     self.class.post("https://api.lightspeedapp.com/API/Account/#{account}/InventoryCount.json", headers: headers, body: JSON.dump(payload)).parsed_response
   end
 
-  def update_po_cv(params)
-    self.refresh_token
-    sleep 1
+  def update_po_oro_completed(params)
     payload = {
       "CustomFieldValues": {
         "CustomFieldValue": {
-          "customFieldID": "2",
+          "customFieldID": oro_completed_custom_field_id,
           "value": "true"
         }
       }
     }
     self.class.put("https://api.lightspeedapp.com/API/Account/#{account}/Order/#{params[:id]}.json", headers: headers, body: JSON.dump(payload)).parsed_response
+  end
+
+  def oro_completed_custom_field_id
+    return @oro_completed_custom_field_id if @oro_completed_custom_field_id.present?
+    res = self.class.get("https://api.lightspeedapp.com/API/Account/#{account}/Order/CustomField.json?name=#{ORO_COMPLETED}", headers: headers).parsed_response    
+    @oro_completed_custom_field_id = res["CustomField"]["customFieldID"] if res["CustomField"].present?
+    @oro_completed_custom_field_id
   end
 
   def headers
@@ -325,11 +334,15 @@ class LightApi < ApplicationRecord
   end
 
   def get_shops
-    self.class.get("https://api.lightspeedapp.com/API/Account/#{account}/Shop.json?load_relations=all", headers: headers).parsed_response
+    @shops ||= self.class.get("https://api.lightspeedapp.com/API/Account/#{account}/Shop.json?load_relations=all", headers: headers).parsed_response
   end
 
   def get_shop(params)
     self.class.get("https://api.lightspeedapp.com/API/Account/#{account}/Shop/#{params[:id]}.json?load_relations=all", headers: headers).parsed_response
+  end
+
+  def default_shop_id
+    @default_shop_id ||= get_shops["Shop"].is_a?(Hash) ? get_shops["Shop"].fetch("shopID") : get_shops["Shop"].first.fetch("shopID")
   end
 
   # def get_item_shops
@@ -372,7 +385,7 @@ class LightApi < ApplicationRecord
   #
   # @return [Array] purchased orders
   def purchase_orders_oro_completed
-    @orders_oro_completed ||= purchase_orders_with_custom_field('oro_completed', 'true')
+    @orders_oro_completed ||= purchase_orders_with_custom_field(ORO_COMPLETED, 'true')
   end
 
   def order_line(params)
