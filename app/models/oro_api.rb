@@ -2,6 +2,7 @@ class OroApi < ApplicationRecord
   include HTTParty
 
   has_many :light_apis
+  has_many :light_api_logs, foreign_key: :oro_api_client_id, primary_key: :client_id
 
 
   def self.sanitize_order_lines(params)
