@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_09_26_130019) do
+ActiveRecord::Schema.define(version: 2021_09_26_195048) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -50,6 +50,19 @@ ActiveRecord::Schema.define(version: 2021_09_26_130019) do
     t.datetime "updated_at", precision: 6, null: false
     t.index ["email"], name: "index_admin_users_on_email", unique: true
     t.index ["reset_password_token"], name: "index_admin_users_on_reset_password_token", unique: true
+  end
+
+  create_table "light_api_logs", force: :cascade do |t|
+    t.string "light_api_entity_id"
+    t.string "entity_type"
+    t.string "light_api_client_id"
+    t.string "oro_api_client_id"
+    t.text "contents"
+    t.text "payload"
+    t.text "response"
+    t.boolean "sent_to_orodoro", default: true
+    t.boolean "is_failed", default: false
+    t.string "event"
   end
 
   create_table "light_apis", force: :cascade do |t|
