@@ -334,11 +334,15 @@ class LightApi < ApplicationRecord
   end
 
   def get_shops
-    self.class.get("https://api.lightspeedapp.com/API/Account/#{account}/Shop.json?load_relations=all", headers: headers).parsed_response
+    @shops ||= self.class.get("https://api.lightspeedapp.com/API/Account/#{account}/Shop.json?load_relations=all", headers: headers).parsed_response
   end
 
   def get_shop(params)
     self.class.get("https://api.lightspeedapp.com/API/Account/#{account}/Shop/#{params[:id]}.json?load_relations=all", headers: headers).parsed_response
+  end
+
+  def default_shop_id
+    @default_shop_id ||= get_shops["Shop"].is_a?(Hash) ? get_shops["Shop"].fetch("shopID") : get_shops["Shop"].first.fetch("shopID")
   end
 
   # def get_item_shops
