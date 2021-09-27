@@ -7,7 +7,6 @@ ActiveAdmin.register LightApiLog do
     id_column
     column :light_api_entity_id
     column :entity_type
-   
     column :light_api_client_id
     column :oro_api_client_id
     column :contents
