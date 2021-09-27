@@ -7,8 +7,6 @@ class LightApi < ApplicationRecord
   belongs_to :oro_api, optional: true
   has_many :light_api_logs, foreign_key: :light_api_client_id, primary_key: :client_id
 
-  #enum api_status: [:active, :suspended]
-
   ORO_COMPLETED = 'oro_completed'
 
   def get_reconciles
