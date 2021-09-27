@@ -1,6 +1,6 @@
 ActiveAdmin.register LightApi do
 
-  permit_params :client_id, :client_secret, :refresh, :account, :light_key, :oro_api_id
+  permit_params :client_id, :client_secret, :refresh, :account, :light_key, :oro_api_id, :status
 
   #  ____ ___  ___  _
   # | |_ / / \| |_)| |\/|
@@ -15,6 +15,7 @@ ActiveAdmin.register LightApi do
       f.input :refresh
       f.input :account
       f.input :light_key
+      f.input :status
       actions
     end
   end

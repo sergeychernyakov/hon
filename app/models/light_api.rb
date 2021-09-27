@@ -1,4 +1,7 @@
 class LightApi < ApplicationRecord
+  
+  enum status: [:active, :suspended]
+
   include HTTParty
 
   belongs_to :oro_api, optional: true

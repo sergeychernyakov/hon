@@ -1,7 +1,7 @@
 class Orodoro::OrdersSyncer
   class << self
     def sync_all
-      LightApi.all.each do |light_api|
+      LightApi.active.each do |light_api|
         oro_api = light_api.oro_api || OroApi.last
         next if oro_api.blank?
 
