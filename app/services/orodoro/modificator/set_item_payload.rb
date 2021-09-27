@@ -46,8 +46,7 @@ class Orodoro::Modificator::SetItemPayload
   def payload(counter)
     ids_to_params = '%5B%22' + item_ids.compact.join('%22%2c%22') + '%22%5D'
 
-    response = LightApi.get("
-			https://api.lightspeedapp.com/API/Account/#{light_api.account}/Item.json?offset=#{counter}&load_relations=%5B%22ItemShops%22%2c%22CustomFieldValues%22%5D&itemID=IN,#{ids_to_params}", headers: headers).parsed_response
+    response = LightApi.get("https://api.lightspeedapp.com/API/Account/#{light_api.account}/Item.json?offset=#{counter}&load_relations=%5B%22ItemShops%22%2c%22CustomFieldValues%22%5D&itemID=IN,#{ids_to_params}", headers: light_api.headers).parsed_response
     response.dig('Item')
   end
 
