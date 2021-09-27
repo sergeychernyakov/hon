@@ -9,12 +9,8 @@ namespace :seed do
     po = l.purchase_order(id: "5")
     # binding.pry
     items = po["Order"]["OrderLines"]["OrderLine"]
-    item_ids = items.pluck("itemID")
-    payload = l.get_item_payload(ids: item_ids, shop_id: "1").select { |x| x["shop"] == "1" }
-    
-    payload.each do |p|
-      p["quantity"] = items.find {|x| x["itemID"] == p["item"] }["quantity"].to_i
-    end
+    payload = Orodoro::Modificator::SetItemPayload.call(items, l)
+
     # oro_payload = OroApi.create_sales_order_payload(lines: payload).as_json
     oro_order = o.create_sales_order(lines: payload)
     binding.pry
