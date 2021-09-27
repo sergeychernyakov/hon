@@ -6,8 +6,9 @@ class Orodoro::OrdersSyncer
         next if oro_api.blank?
 
         Orodoro::OrdersSyncer.new(light_api, oro_api).sync
-        puts "All light API accounts synced"
+        puts "Light API ID: #{light_api.id} Synced properly"
       end
+      puts "All light API accounts synced"
     end
   end # class << self
 
@@ -21,7 +22,6 @@ class Orodoro::OrdersSyncer
   def sync
     refresh_light_api_token
     sync_orders
-    puts "Light API ID: #{light_api.id} Synced properly"
   end
 
   def refresh_light_api_token
@@ -36,12 +36,13 @@ class Orodoro::OrdersSyncer
       payload = Orodoro::OrderDataBuilder.new(light_api, purchase_order_obj).build
       oro_order = oro_api.create_sales_order(lines: payload, order_id: order_id)
       light_api.update_po_oro_completed(id: order_id) #mark oro_completed custom field
+      is_failed = oro_order["error_message"].present?
       Orodoro::Logger.new(
         light_api_client_id: light_api.client_id, oro_api_client_id: oro_api.client_id, entity_type: LightApiLog::PURCHASE_ORDER_ENTITY_TYPE, 
-        light_api_entity_id: order_id, payload: payload.to_json, response: oro_order.to_json, event: LightApiLog::CREATE_EVENT
+        light_api_entity_id: order_id, payload: payload.to_json, response: oro_order.to_json, event: LightApiLog::CREATE_EVENT, is_failed: is_failed, sent_to_orodoro: !is_failed
       ).log!
 
-      puts "Order ID: #{order_id} Created successfully on ORO side"
+      puts "Order ID: #{order_id} #{is_failed ? 'failed' : 'Created successfully'} on ORO side"
     end
   end
 

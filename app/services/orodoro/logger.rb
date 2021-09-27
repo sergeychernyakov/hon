@@ -6,7 +6,7 @@ class Orodoro::Logger
 
   def log!
     @light_api_log = LightApiLog.new(@log_params)
-    @light_api_log.contents = contents
+    @light_api_log.contents = contents unless @light_api_log.is_failed?
     @light_api_log.save
   end
 

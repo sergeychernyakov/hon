@@ -17,54 +17,6 @@ class LightApi < ApplicationRecord
     self.class.post("https://api.lightspeedapp.com/API/Account/#{account}/InventoryCountReconcile.json", headers: headers, body: JSON.dump(payload)).parsed_response
   end
 
-  def get_item_payload(params)
-    items = []
-     ids_to_params = "%5B%22" + params[:ids].compact.join("%22%2c%22") + "%22%5D"
-     counter = 0
-     while counter < 1000
-       self.refresh_token
-       sleep 3
-       res = self.class.get("https://api.lightspeedapp.com/API/Account/#{account}/Item.json?offset=#{counter}&load_relations=%5B%22ItemShops%22%2c%22CustomFieldValues%22%5D&itemID=IN,#{ids_to_params}", headers: headers).parsed_response
-       payload = res.dig("Item")
-       if payload.nil? || payload.empty?
-         break
-       end
-       if payload.class == Hash
-         zz = [payload].map do |x|
-           x.dig("ItemShops","ItemShop")
-            .map do |z|
-               {
-                name: x["description"],
-                item: z["itemID"],
-                price: x["Prices"]["ItemPrice"].first["amount"].to_f,
-                cost: x["defaultCost"].to_f,
-                sku: x["manufacturerSku"],
-                qoh: z["qoh"],
-                shop: z["shopID"]
-              } if params[:shop_id] == z["shopID"]
-            end.compact
-          end
-         items << zz
-         break
-       end
-       items << payload.map do |x|
-         x.dig("ItemShops","ItemShop").map do |z|
-           {
-             item: z["itemID"],
-             name: x["description"],
-             price: x["Prices"]["ItemPrice"].first["amount"].to_f,
-             cost: x["defaultCost"].to_f,
-             sku: x["manufacturerSku"],
-             qoh: z["qoh"],
-             shop: z["shopID"]
-           } if params[:shop_id] == z["shopID"]
-         end.compact
-       end.compact
-       counter += 100
-     end
-     items.flatten.as_json
-  end
-
   def get_counts
     self.class.get("https://api.lightspeedapp.com/API/Account/#{account}/InventoryCount.json", headers: headers).parsed_response
   end
