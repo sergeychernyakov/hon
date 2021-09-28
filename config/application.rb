@@ -32,7 +32,8 @@ module Honeycomb
       end if File.exists?(env_file)
     end
 
-    OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
+    # Already initiated as OpenSSL::SSL::VERIFY_NONE
+    # OpenSSL::SSL::VERIFY_PEER = OpenSSL::SSL::VERIFY_NONE
 
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration can go into files in config/initializers
