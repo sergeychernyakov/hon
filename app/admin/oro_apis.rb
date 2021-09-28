@@ -1,6 +1,6 @@
 ActiveAdmin.register OroApi do
 
-  permit_params :client_id, :client_secret, :oro_key, :refresh_key, :merchant_id, :name
+  permit_params :name, :client_id, :client_secret, :oro_key, :refresh_key, :merchant_id
 
   #  ____ ___  ___  _
   # | |_ / / \| |_)| |\/|
@@ -18,5 +18,14 @@ ActiveAdmin.register OroApi do
       actions
     end
   end
-  
+
+
+  index do
+    selectable_column
+    column :name
+    column :client_id
+    column :client_secret
+    column :created_at
+    actions
+  end
 end
