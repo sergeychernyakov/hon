@@ -9,7 +9,7 @@ ActiveAdmin.register LightApi do
   form title: ->(light_api) { light_api.persisted? ? "Editing Light Api" : "New Light Api" } do |f|
     f.semantic_errors(*f.object.errors.keys)
     f.inputs do
-      f.input :oro_api_id, as: :select, collection: options_from_collection_for_select(OroApi.order(:client_id), 'id', 'client_id', f.object.oro_api_id)
+      f.input :oro_api_id, as: :select, collection: options_from_collection_for_select(OroApi.order(:client_id), 'id', 'label', f.object.oro_api_id)
       f.input :client_id
       f.input :client_secret
       f.input :refresh

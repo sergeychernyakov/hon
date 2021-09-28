@@ -17,6 +17,10 @@ class OroApi < ApplicationRecord
     sanitized_lines
   end
 
+  def label
+    name || client_id
+  end
+
   def item_by_sku(params)
     self.class.get("https://api.ordoro.com/product/#{params[:sku]}/", headers: headers).parsed_response
   end
