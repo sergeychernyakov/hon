@@ -34,9 +34,11 @@ class Orodoro::OrdersSyncer
       next if LightApiLog.synced_already?(order_id, LightApiLog::PURCHASE_ORDER_ENTITY_TYPE, light_api.client_id, oro_api.client_id)
 
       payload = Orodoro::OrderDataBuilder.new(light_api, purchase_order_obj).build
-      oro_order = oro_api.create_sales_order(lines: payload, order_id: order_id)
-      light_api.update_po_oro_completed(id: order_id) #mark oro_completed custom field
+      oro_order = oro_api.create_sales_order(lines: payload, order_id: order_id, account_id: light_api.account)
       is_failed = oro_order["error_message"].present?
+      light_api.update_po_oro_completed(id: order_id) unless is_failed #mark oro_completed custom field
+      LightApiLog.cleanup_already_failed_log(order_id, LightApiLog::PURCHASE_ORDER_ENTITY_TYPE, light_api.client_id, oro_api.client_id) if is_failed
+
       Orodoro::Logger.new(
         light_api_client_id: light_api.client_id, oro_api_client_id: oro_api.client_id, entity_type: LightApiLog::PURCHASE_ORDER_ENTITY_TYPE, 
         light_api_entity_id: order_id, payload: payload.to_json, response: oro_order.to_json, event: LightApiLog::CREATE_EVENT, is_failed: is_failed, sent_to_orodoro: !is_failed

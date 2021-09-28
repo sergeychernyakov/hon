@@ -81,13 +81,14 @@ class OroApi < ApplicationRecord
   end
 
   def create_sales_order(params)
-    payload = OroApi.create_sales_order_payload(lines: params[:lines], order_id: params[:order_id])
+    payload = OroApi.create_sales_order_payload(lines: params[:lines], order_id: params[:order_id], account_id: params[:account_id])
     res = self.class.post("https://api.ordoro.com/v3/order", headers: headers, body: JSON.dump(payload)).parsed_response
     res
   end
 
   def self.create_sales_order_payload(params)
     order_id = "#{params[:order_id]}"
+    account_id = "#{params[:account_id]}"
     mapped_lines = params[:lines].map do |z|
         {
           "product_name": z["name"],
@@ -121,7 +122,7 @@ class OroApi < ApplicationRecord
         "tax_amount": counter * 0.05,
         "grand_total": counter + (counter * 0.05),
         "order_date": Time.zone.now.to_s,
-        "order_id": "myorder-id-#{order_id}",
+        "order_id": "lightspeed-account-#{account_id}-id-#{order_id}",
         "shipping_address": {
             "city": "Athens",
             "country": "USA",
