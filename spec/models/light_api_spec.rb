@@ -2,76 +2,65 @@ require 'rails_helper'
 
 describe LightApi, type: :model do
 
-  let(:light_api) { LightApi.new(client_secret: "Test Secret", client_id: "Test Client Id", account: "Test account") }
-
-  before do
-  	light_api.refresh_token
-
-  	stub_request(:get, "https://api.lightspeedapp.com/API/Account/#{light_api.account}/InventoryCountReconcile.json").
-     with(
-       body: "refresh_token=&client_secret=Test%20Secret&client_id=Test%20Client%20Id&grant_type=refresh_token",
-       headers: {
-   	  'Accept'=>'*/*',
-   	  'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
-   	  'User-Agent'=>'Ruby'
-       }).
-     to_return(status: 200, body: "{'attributes'=>{'count'=>'0'}}", headers: {})
-
-
-
-
-    # stub_request(:get, "https://api.lightspeedapp.com/API/Account/#{light_api.account}/InventoryCountReconcile.json").
-    #   to_return(:status => 200, :body => '{"attributes"=>{"count"=>"0"}}')
-  end
-
-  describe "field_names" do
-    subject { shipstation.field_names }
-
-    it { should include 'client_secret' }
-    it { should include 'client_id' }
-    it { should include 'account' }
-  end
+  let(:light_api) { LightApi.new(client_secret: "API Secret", client_id: "API Client Id", account: "333333", light_key: "Test Light key") }
+  let(:account_name) { 'Test Account' }
 
   describe "attribtes" do
     subject { light_api.attributes }
 
-    it { should == {"count"=>"0"} }
+    it { should include 'client_secret' }
+    it { should include 'client_id' }
+    it { should include 'light_key' }
+    it { should include 'account' }
+    it { should include 'status' }
   end
 
-  # context "with stubbed products" do
+  describe "client_secret" do
+    subject { light_api.client_secret }
 
-  #   before do
-  #     stub_request(:get, "https://ssapi.shipstation.com/products?page=1&pageSize=500").
-  #       to_return(:status => 200, :body => '{"products":[{"productId":149954969,"sku":"ABC123","name":"Test item #1","price":99.99},{"productId":149954970,"sku":"ABC345","name":"Test item #2","price":199.99}]}')
-  #   end
+    it { should =~ /API Secret/ }
+  end
 
-  #   describe "#products" do
-  #     subject { shipstation.products }
-  #     it { should == [["ABC123", "Test item #1 99.99"], ["ABC345", "Test item #2 199.99"]] }
-  #   end
+  describe "client_id" do
+    subject { light_api.client_id }
 
-  #   describe "#stores" do
-  #     subject { shipstation.stores }
+    it { should =~ /API Client Id/ }
+  end
 
-  #     before do
-  #       stub_request(:get, "https://ssapi.shipstation.com/stores").
-  #         to_return(status: 200, body: '[{"storeId":149954969,"storeName":"Test item #1"},{"storeId":149954970,"storeName":"Test item #2"}]')
-  #     end
+  context "with stubbed accounts" do
 
-  #     it { should == [[149954969, "Test item #1"], [149954970, "Test item #2"]] }
-  #   end
+    before do
+      stub_request(:get, "https://api.lightspeedapp.com/API/Account").
+        with(headers: light_api.headers).
+        to_return(body: "<Accounts count=1><Account><accountID>#{light_api.account}</accountID><name>#{account_name}</name>")
+    end
 
-  #   describe "to" do
-  #     subject { shipstation.to }
-  #     it { should include 'products' }
-  #     it { should include 'stores' }
-  #   end
+    describe "#get_account" do
+      subject { light_api.get_account }
+      it { expect(light_api.get_account).to include("#{light_api.account}") }
+      it { expect(light_api.get_account).to include("#{account_name}") }
+    end
 
-  #   describe "with" do
-  #     subject { shipstation.with('products') }
-  #     it { should eql shipstation.products }
-  #   end
+  end
 
-  # end
+
+  context "with stubbed Shops" do
+
+    let(:shop_name) { 'Test Shop' }
+    let(:shop_id) { '111111' }
+
+    before do
+      stub_request(:get, "https://api.lightspeedapp.com/API/Account/#{light_api.account}/Shop.json?load_relations=all").
+        with(headers: light_api.headers).
+        to_return(body: '{"@attributes"=>{"count"=>"1", "offset"=>"0", "limit"=>"100"}, "Shop"=>{"shopID"=>"#{shop_id}", "name"=>"#{shop_name}", "serviceRate"=>"0", "timeZone"=>"EST", "taxLabor"=>"false", "labelTitle"=>"Shop Name", "labelMsrp"=>"false", "archived"=>"false", "timeStamp"=>"2021-09-25T06:06:53+00:00", "companyRegistrationNumber"=>"", "vatNumber"=>"", "zebraBrowserPrint"=>"true"}}')
+    end
+
+    describe "#get_shops" do
+      subject { light_api.get_shops }
+      it { expect(light_api.get_shops).to include("shopID") }
+      it { expect(light_api.get_shops).to include("name") }
+    end
+
+  end
 
 end
