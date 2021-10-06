@@ -1,10 +1,11 @@
 class Orodoro::Modificator::SetItemPayload
-  def self.call(items, light_api)
-    new(items, light_api).call
+  def self.call(purchase_order_obj, light_api)
+    new(purchase_order_obj, light_api).call
   end
 
-  def initialize(items, light_api)
-    @items = items
+  def initialize(purchase_order_obj, light_api)
+    @purchase_order_obj = purchase_order_obj
+    @items = [purchase_order_obj["OrderLines"]["OrderLine"]].flatten
     @light_api = light_api
   end
 
@@ -61,7 +62,7 @@ class Orodoro::Modificator::SetItemPayload
         sku: x['manufacturerSku'],
         qoh: z['qoh'],
         shop: z['shopID']
-      }
+      } if current_shop_id == z["shopID"]
     end.compact
   end
 
@@ -73,5 +74,9 @@ class Orodoro::Modificator::SetItemPayload
     @payload.each do |payload_item|
       payload_item['quantity'] = items.find { |item| item['itemID'] == payload_item['item'] }&.fetch('quantity').to_i
     end
+  end
+
+  def current_shop_id
+    @current_shop_id ||= @purchase_order_obj["shopID"]
   end
 end

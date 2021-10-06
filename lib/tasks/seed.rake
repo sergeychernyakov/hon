@@ -7,9 +7,7 @@ namespace :seed do
     o = OroApi.last
     l.refresh_token
     po = l.purchase_order(id: "5")
-    # binding.pry
-    items = po["Order"]["OrderLines"]["OrderLine"]
-    payload = Orodoro::Modificator::SetItemPayload.call(items, l)
+    payload = Orodoro::Modificator::SetItemPayload.call(po, l)
 
     # oro_payload = OroApi.create_sales_order_payload(lines: payload).as_json
     oro_order = o.create_sales_order(lines: payload)

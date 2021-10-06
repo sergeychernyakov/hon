@@ -17,9 +17,8 @@ class Orodoro::OrderDataBuilder
 
   def build_order_payload
     return if purchase_order_obj["OrderLines"].blank?
-    items = purchase_order_obj["OrderLines"]["OrderLine"].is_a?(Hash) ? [purchase_order_obj["OrderLines"]["OrderLine"]] : purchase_order_obj["OrderLines"]["OrderLine"]    
 
-    @payload = Orodoro::Modificator::SetItemPayload.call(items, light_api)
+    @payload = Orodoro::Modificator::SetItemPayload.call(purchase_order_obj, light_api)
   end
 
 end
